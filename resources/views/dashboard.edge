@@ -1,0 +1,302 @@
+@layout('layouts/main')
+@set('title', 'Dashboard')
+@section('content')
+
+<style type="text/css">
+  body {
+    overflow-x: hidden;
+  }
+
+  #list1 .form-control {
+    border-color: transparent;
+  }
+
+  #list1 .form-control:focus {
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  #list1 .select-input.form-control[readonly]:not([disabled]) {
+    background-color: #fbfbfb;
+  }
+
+</style>
+
+<div class="contaner">
+  <div class="row">
+    <div class="col-md-12">
+
+      <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+          <div class="col">
+            <div class="card" id="list1" style="border-radius: .75rem; background-color: #eff1f2;">
+              <div class="card-body py-4 px-4 px-md-5">
+
+                <p class="h1 text-center mt-3 mb-4 pb-3 text-primary">
+                  <i class="fas fa-check-square me-1"></i>
+                  <u>Todo List</u>
+                </p>
+
+                @if (flashMessages.has('task_error'))
+
+                <div class="alert alert-warning" role="alert">
+                  <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+                  <span class="alert-text"><strong>Warning!</strong> {{ flashMessages.get('task_error') }}</span>
+                </div>
+
+                @endif
+
+                @if (flashMessages.has('task_success'))
+
+                <div class="alert alert-success" role="alert">
+                  <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+                  <span class="alert-text"><strong>Success!</strong> {{ flashMessages.get('task_success') }}</span>
+                </div>
+
+                @endif
+
+                @if (flashMessages.has('alert'))
+
+                <div class="alert alert-success" role="alert">
+                  <span class="alert-icon"><i class="ni ni-like-2"></i></span>
+                  <span class="alert-text"><strong>Success!</strong> {{ flashMessages.get('alert') }}</span>
+                </div>
+
+                @endif
+
+                <div class="pb-2">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="d-flex flex-row align-items-center">
+                        <input type="text" class="form-control form-control-lg" placeholder="Adicionar..."
+                          id="form-init">
+                        <a href="#!"><i class="fas fa-calendar-alt fa-lg mr-3"></i></a>
+                        <div>
+                          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-form"
+                            onclick="return onClick()">Add</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="modal fade" id="modal-form" tabindex="-1" role="dialog" aria-labelledby="modal-form"
+                  aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add task</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+
+                        <form role="form" method="POST" action="{{ route('task.store') }}">
+
+                          {{ csrfField() }}
+
+                          <div class="form-group mb-3">
+                            <div class="input-group input-group-merge input-group-alternative">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                              </div>
+                              <input minLength="10" maxLength="120" class="form-control"
+                                placeholder="Tasks to do tomorrow..." type="text" id="task-title" name="title" required>
+                            </div>
+                          </div>
+                          <div class="form-group">
+                            <div class="input-group input-group-merge input-group-alternative">
+                              <textarea minLength="10" class="form-control description-form" placeholder="Description"
+                                name="description"></textarea>
+                            </div>
+                          </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                      </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="card">
+              <!-- Card header -->
+              <div class="card-header">
+                <!-- Title -->
+                <h5 class="h3 mb-0">All your tasks</h5>
+              </div>
+              <!-- Card body -->
+              <div class="card-body">
+                <!-- List group -->
+
+                @each(task in tasks)
+                <ul class="list-group list-group-flush list my--3">
+                  <li class="list-group-item px-0">
+                    <div class="row align-items-center">
+                      <div class="col ml--2">
+                        <h4 class="mb-0">
+                          <a href="#!" onClick="$('#taskview-{{ task.id }}').modal('show')">{{ task.title }}</a>
+                        </h4>
+                        <span class="text-{{ task.status ? 'success' : 'warning' }}">● </span>
+                        <small>Status: {{ task.status ? 'Done' : 'Pending' }}</small>
+                      </div>
+                      <div class="col-auto d-flex justify-content-end">
+
+                        @if(task.status)
+                          <form role="form" action="{{ route('task.status', [task.id, '0']) }}?_method=put" method="post">
+                            {{ csrfField() }}
+                            <button type="submit" class="btn btn-sm btn-warning mr-1"><i class="fas fa-link"></i> Make Pending</button>
+                          </form>
+                        @else
+                          <form role="form" action="{{ route('task.status', [task.id, '1']) }}?_method=put" method="post">
+                            {{ csrfField() }}
+                            <button type="submit" class="btn btn-sm btn-success mr-1"><i class="far fa-check-circle"></i> Make Done</button>
+                          </form>
+                        @endif
+
+                        <button type="button" class="btn btn-sm btn-primary ml-1" data-toggle="modal"
+                          data-target="#edit-{{ task.id }}"><i class="far fa-edit"></i> Edit</button>
+
+                        <div class="modal fade" id="edit-{{ task.id }}" tabindex="-1" role="dialog"
+                          aria-labelledby="edit-{{ task.id }}" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Edit task</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+
+                                <form role="form" method="POST" action="{{ route('task.edit') }}?_method=put">
+
+                                  {{ csrfField() }}
+
+                                  <input type="hidden" name="id" value="{{ task.id }}">
+
+                                  <div class="form-group mb-3">
+                                    <div class="input-group input-group-merge input-group-alternative">
+                                      <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-pencil-alt"></i></span>
+                                      </div>
+                                      <input minLength="10" maxLength="120" class="form-control"
+                                        placeholder="Tasks to do tomorrow..." type="text" id="task-title" name="title"
+                                        required value="{{ task.title }}">
+                                    </div>
+                                  </div>
+                                  <div class="form-group">
+                                    <div class="input-group input-group-merge input-group-alternative">
+                                      <textarea minLength="10" class="form-control description-form"
+                                        placeholder="Description" name="description">{{ task.description }}</textarea>
+                                    </div>
+                                  </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary">Save changes</button>
+                              </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+
+                        <form role="form" action="{{ route('task.destroy', [task.id]) }}?_method=delete" method="post">
+                          {{ csrfField() }}
+                          <button type="submit" class="btn btn-sm btn-danger"><i class="far fa-trash-alt"></i> Remove</button>
+                        </form>
+
+
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+
+                <div class="modal fade" id="taskview-{{ task.id }}" tabindex="-1" role="dialog"
+                  aria-labelledby="taskview" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{ task.title }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div name="content-value" hidden>{{ task.description }}</div>
+                      <div class="modal-body">
+
+                        {{{ task.description }}}
+
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                @endeach
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="tinymce/tinymce.min.js"></script>
+
+  <script>
+    tinymce.init({
+      selector: 'textarea.description-form',
+      height: 300,
+      menubar: false,
+      plugins: [
+        'advlist autolink lists link image charmap print preview anchor',
+        'searchreplace visualblocks code fullscreen',
+        'insertdatetime media table paste code help wordcount'
+      ],
+      toolbar: 'undo redo | formatselect | ' +
+        'bold italic backcolor | alignleft aligncenter ' +
+        'alignright alignjustify | bullist numlist outdent indent | ' +
+        'removeformat | help',
+      branding: false,
+      init_instance_callback: function (editor) {
+        editor.setContent(
+          `
+            <h3>To-do list to do tomorrow:</h3>
+    
+            <ul>
+              <li>Buy dog food</li>
+              <li>Go to the market to buy fruit</li>
+              <li>Read 10 pages of the book</li>
+              <li>Send an email to the manager</li>
+            </ul>
+          `
+        )
+      }
+    })
+
+    function onClick() {
+      let task = document.getElementById('task-title')
+      let init = document.getElementById('form-init').value || ''
+      task.value = init
+    }
+
+  </script>
+
+</div>
+</div>
+</div>
+
+@end

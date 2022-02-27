@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8">
+  <meta content="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>{{ title }} ― To-Do List | Snarloff (Adonis.js 5)</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/argon-dashboard@1.2.0/assets/css/argon.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/argon-dashboard@1.2.0/assets/vendor/nucleo/css/nucleo.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/argon-dashboard@1.2.0/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-horizontal navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+      <a class="navbar-brand" href="/" style="font-size: 15px;">Todo List</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-default"
+        aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbar-default">
+        <div class="navbar-collapse-header">
+          <div class="row">
+            <div class="col-6 collapse-brand">
+              <a href="javascript:void(0)">
+                <img src="/img/to-do-list.png">
+              </a>
+            </div>
+            <div class="col-6 collapse-close">
+              <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-default"
+                aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <ul class="navbar-nav ml-lg-auto">
+          @if (auth.user)
+            <li class="nav-item">
+              <a class="nav-link nav-link-icon" data-toggle="tooltip" data-placement="bottom" title="Tooltip on bottom" href="/logout">
+                <i class="fas fa-sign-out-alt fa-lg"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-link-icon" href="/dashboard">
+                <i class="far fa-user-circle fa-lg"></i>
+              </a>
+            </li>
+          @else
+            <li class="nav-item">
+              <a class="nav-link nav-link-icon" onClick="$('#login-form').modal('show')">
+                <i class="fas fa-sign-in-alt fa-lg"></i>
+              </a>
+            </li>
+          @endif
+        </ul>
+
+        <div class="modal fade" id="login-form" tabindex="-1" role="dialog" aria-labelledby="login-form"
+          aria-hidden="true">
+          <div class="modal-dialog modal- modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content">
+  
+              <div class="modal-body p-0">
+  
+                <div class="card bg-secondary border-0 mb-0">
+                  <div class="card-body px-lg-5 py-lg-5">
+                    <div class="text-center text-muted mb-4">
+                      <small>Entre abaixo com seus dados</small>
+                    </div>
+                    <form role="form" method="POST" action="{{ route('auth.login') }}">
+
+                      {{ csrfField() }}
+
+                      <div class="form-group mb-3">
+                        <div class="input-group input-group-merge input-group-alternative {{ flashMessages.get('form') ? 'has-danger' : '' }}">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="ni ni-email-83"></i></span>
+                          </div>
+                          <input class="form-control {{ flashMessages.get('form') ? 'is-invalid' : '' }}" placeholder="Usuário / Email" type="text" name="uid">
+                          
+                          @if (flashMessages.has('form'))
+                            <div class="invalid-feedback mb-2 ml-2">
+                              {{ flashMessages.get('form') }}
+                            </div>
+                          @endif
+                        
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="input-group input-group-merge input-group-alternative">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="ni ni-lock-circle-open"></i></span>
+                          </div>
+                          <input class="form-control" placeholder="Senha" type="password" name="password">
+                        </div>
+                      </div>
+                      <div class="custom-control custom-control-alternative custom-checkbox">
+                        <input class="custom-control-input" id=" customCheckLogin" type="checkbox">
+                        <label class="custom-control-label" for=" customCheckLogin">
+                          <span class="text-muted">Lembrar de mim</span>
+                        </label>
+                      </div>
+                      <div class="text-center">
+                        <button type="submit" class="btn btn-primary my-4">Entrar na conta</button> <br>
+                        <small class="text-muted">Ou crie sua conta <a href="/?registerError=true" onClick="$('#register-form').modal('show'); $('#login-form').modal('hide');">clicando aqui</a></small>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+  
+              </div>
+  
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="register-form" tabindex="-1" role="dialog" aria-labelledby="modal-form"
+          aria-hidden="true">
+          <div class="modal-dialog modal- modal-dialog-centered modal-sm" role="document">
+            <div class="modal-content">
+  
+              <div class="modal-body p-0">
+  
+                <div class="card bg-secondary border-0 mb-0">
+                  <div class="card-body px-lg-5 py-lg-5">
+                    <div class="text-center text-muted mb-4">
+                      <small>Crie sua conta abaixo</small>
+                    </div>
+                    <form role="form" method="POST" action="{{ route('auth.register') }}">
+
+                      {{ csrfField() }}
+
+                      <div class="form-group mb-3 {{ flashMessages.get('username') ? 'has-danger' : ''}}">
+                        <div class="input-group input-group-merge input-group-alternative">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="ni ni-email-83"></i></span>
+                          </div>
+                          <input class="form-control {{ flashMessages.get('username') ? 'is-invalid' : ''}}" placeholder="Nome" type="text" name="username">
+
+                          @if (flashMessages.has('errors.username'))
+                            <div class="invalid-feedback mb-2 ml-2">
+                              {{ flashMessages.get('errors.username') }}
+                            </div>
+                          @endif
+
+                        </div>
+                      </div>
+
+                      <div class="form-group mb-3 {{ flashMessages.get('email') ? 'has-danger' : ''}}">
+                        <div class="input-group input-group-merge input-group-alternative">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="ni ni-email-83"></i></span>
+                          </div>
+                          <input class="form-control {{ flashMessages.get('email') ? 'is-invalid' : ''}}" placeholder="Email" type="email" name="email">
+
+                          @if (flashMessages.has('errors.email'))
+                            <div class="invalid-feedback mb-2 ml-2">
+                              {{ flashMessages.get('errors.email') }}
+                            </div>
+                          @endif
+
+                        </div>
+                      </div>
+
+ 
+                      <div class="form-group {{ flashMessages.get('pasword') ? 'has-danger' : ''}}">
+                        <div class="input-group input-group-merge input-group-alternative">
+                          <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="ni ni-lock-circle-open"></i></span>
+                          </div>
+                          <input class="form-control {{ flashMessages.get('password') ? 'is-invalid' : ''}}" placeholder="Senha" type="password" name="password">
+                          
+                          @if (flashMessages.has('errors.password'))
+                            <div class="invalid-feedback mb-2 ml-2">
+                              {{ flashMessages.get('errors.password') }}
+                            </div>
+                          @endif
+
+                        </div>
+                      </div>
+                      <div class="text-center">
+                        <button type="submit" class="btn btn-primary my-4">Criar conta</button> <br>
+                        <small class="text-muted">Ou entre na sua conta <a href="#" type="button" data-toggle="modal" data-target="#login-form" onClick="$('#register-form').modal('hide');">clicando aqui</a></small>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+  
+              </div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+
+    </div>
+    </div>
+  </nav>
+
+  @!section('content')
+
+  <footer>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/argon-dashboard@1.2.0/assets/js/argon.min.js"></script>
+    
+    <script>
+      $(document).ready(function () {
+        
+        const url_string = window.location.href
+        
+        if (String(url_string).includes('registerError')){
+          $('#register-form').modal('show')
+        }
+
+        if (String(url_string).includes('loginError')){
+          $('#login-form').modal('show')
+        }
+             
+      })
+
+    </script>
+  
+  </footer>
+
+</body>
+
+</html>
